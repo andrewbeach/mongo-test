@@ -1,0 +1,14 @@
+src/main/resources/application.conf
+target/
+*.class
+.DS_Store
+
+.cache/
+.history/
+.lib/
+dist/*
+lib_managed/
+src_managed/
+project/boot
+project/plugins/project
+
