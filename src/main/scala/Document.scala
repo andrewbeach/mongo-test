@@ -1,6 +1,5 @@
 package Document
 
-import com.mongodb.casbah.Imports._ 
 import net.liftweb.json._
 
 trait Document {
@@ -57,17 +56,18 @@ object Receipts {
 		println(print_string)
 	}
 
-	def printList(rl: List[Receipt]) = {
-		rl.foreach(r => print(r))
+	def printList(ls: List[Receipt]) = {
+		ls.foreach(r => print(r))
 	}
 
-	def parse(cursor: MongoCursor): List[Receipt] = {
-		// Parse query response as JSON
-		implicit val formats = DefaultFormats // No customization of parser
-		val parsed: Iterator[JValue] = cursor.map(doc => net.liftweb.json.parse(doc.toString))
-		val receipt_list: List[JValue] = parsed.toList
-		
-		receipt_list.map(doc => doc.extract[Receipt])
+	def parse(d: String): Receipt = {
+		implicit val formats = DefaultFormats // No customization of JSON parser
+		net.liftweb.json.parse(d).extract[Receipt]
+	}
+
+	def parseList[T <: Iterator[String]](ls: T): List[Receipt] = {
+
+		ls.toList.map(li => parse(li))
 	}
 
 	val default_projection = Seq("account_id" -> 1, 

@@ -16,28 +16,28 @@ class DocumentDAO(conf: DAOConfig) {
 	val coll: MongoCollection = mongoClient(conf.db)(conf.coll) 
 	val projection = conf.proj
 
-	def wrap(seq: Seq[(String,Any)]) = {
+	def mdbObject(seq: Seq[(String,Any)]): MongoDBObject = {
 		val builder = MongoDBObject.newBuilder
 		seq.foreach(f => builder += f)
 		builder.result
 	}
 
-	def find(selection: Seq[(String,Any)]): MongoCursor = {
-		coll.find(wrap(selection), wrap(projection))
+	def find(selection: Seq[(String,Any)]): Iterator[String] = {
+		coll.find(mdbObject(selection), mdbObject(projection)).map(doc => doc.toString)
 	}
 
-	def findReceiptsById(id: Int): List[Receipt] = {
+	def findReceiptsByAccountId(id: Int): List[Receipt] = {
 		val selection = Seq("account_id" -> id, 
 							"type" -> "receipt")
-		val docs: MongoCursor = find(selection)
-		Receipts.parse(docs)
+		val receipts: Iterator[String] = find(selection)
+		Receipts.parseList(receipts)
 	}	
 
 	def count(selection: Seq[(String,Any)]): Int = {
-		coll.count(wrap(selection))
+		coll.count(mdbObject(selection))
 	}
 
-	def countById(ids: Iterator[Int]): Iterator[(Int, Int)] = {
+	def countByAccountId(ids: Iterator[Int]): Iterator[(Int, Int)] = {
 		ids map {id =>
 			val selection = Seq("account_id" -> id)
 			val num = count(selection)
