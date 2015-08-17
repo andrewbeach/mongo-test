@@ -1,5 +1,8 @@
 package Document
 
+import com.mongodb.casbah.Imports._ 
+import net.liftweb.json._
+
 trait Document {
 
 }
@@ -14,6 +17,7 @@ case class Receipt(account_id: Int,
 	def getLast4: String = fields.payment_type.last4 getOrElse "No last 4"
 	def getCategories: List[String] = fields.categories getOrElse List()
 	def getCategoryString: String = (fields.categories getOrElse List()) mkString ", "
+	def getTotal: Int = fields.total.on_document getOrElse 0
 	def getSourceString: String = source.name match {
 		case Some(s) if s == "mail in" => s + ": " + (this.source.envelope getOrElse "")
 		case Some(s) if s == "integration" => s + ": " + (this.source.api_app_name getOrElse "")
@@ -47,6 +51,35 @@ case class Total(on_document: Option[Int],
 
 /* RECEIPT COMPANION OBJECT */
 object Receipts {
+
+	def print(r: Receipt) = {
+		val print_string = r.getSeller + " for $" + r.getTotal + " | " + r.getCategoryString
+		println(print_string)
+	}
+
+	def printList(rl: List[Receipt]) = {
+		rl.foreach(r => print(r))
+	}
+
+	def parse(cursor: MongoCursor): List[Receipt] = {
+		// Parse query response as JSON
+		implicit val formats = DefaultFormats // No customization of parser
+		val parsed: Iterator[JValue] = cursor.map(doc => net.liftweb.json.parse(doc.toString))
+		val receipt_list: List[JValue] = parsed.toList
+		
+		receipt_list.map(doc => doc.extract[Receipt])
+	}
+
+	val default_projection = Seq("account_id" -> 1, 
+								"source" -> 1, 
+								"fields.categories" -> 1, 
+								"fields.seller" -> 1, 
+								"fields.payment_type" -> 1, 
+								"fields.total" -> 1, 
+								"fields.note" -> 1, 
+								"fields.currency" -> 1, 
+								"_id" -> 0)
+
 	def total(ls: List[Receipt]): Int = {	
 		ls.foldLeft[Int](0)((acc, r) => acc + (r.fields.total.on_document getOrElse 0))
 	}
@@ -60,4 +93,7 @@ object Receipts {
 	def countByVendor(ls: List[Receipt]): Map[String, Int] = {
 		groupByVendor(ls).map(p => (p._1, p._2.length))
 	}
+
+	// Receipts.countByVendor(receipts).toList sortWith {_._2 > _._2}
+	// vendorCount.foreach({ case (vendor, count) => println(vendor + " -> " + count)})
 }
