@@ -1,8 +1,8 @@
 package Document
 
-import net.liftweb.json._
+import net.liftweb.json.{parse => parseJSON, _ => _} 
 
-trait Document {
+abstract class Document {
 
 }
 
@@ -49,7 +49,7 @@ case class Total(on_document: Option[Int],
 			in_account_currency: Option[Int])
 
 /* RECEIPT COMPANION OBJECT */
-object Receipts {
+object Receipt {
 
 	def print(r: Receipt) = {
 		val print_string = r.getSeller + " for $" + r.getTotal + " | " + r.getCategoryString
@@ -62,7 +62,7 @@ object Receipts {
 
 	def parse(d: String): Receipt = {
 		implicit val formats = DefaultFormats // No customization of JSON parser
-		net.liftweb.json.parse(d).extract[Receipt]
+		parseJSON(d).extract[Receipt]
 	}
 
 	def parseList[T <: Iterator[String]](ls: T): List[Receipt] = {

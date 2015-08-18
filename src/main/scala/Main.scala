@@ -3,6 +3,7 @@ package mongo.export
 import com.typesafe.config._
 
 import Document._
+import Account._
 import DocumentDAO._
 import Data._
 
@@ -17,13 +18,16 @@ object Main extends App {
 
 	val account_ids = Import.fromCSV("data/input.csv")
 
-	documents.countByAccountId(account_ids).foreach(println)
+	// documents.countByAccountId(account_ids).foreach(println)
 
-	val receipts = documents.findReceiptsByAccountId(680886300)
+	// val receipts = documents.findReceiptsByAccountId(680886300)
 	
-	Receipts.groupByVendor(receipts).foreach { case (v, lr) =>
-		println(v + ": ")
-		Receipts.printList(lr)
-	}
+	// Receipt.groupByVendor(receipts).foreach { case (v, lr) =>
+	// 	println(v + ": ")
+	// 	Receipt.printList(lr)
+	// }
+
+	val count_list: List[Account] = documents.countByAccountId2(account_ids)
+	count_list.foreach(println)
 
 }

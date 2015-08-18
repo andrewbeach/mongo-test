@@ -3,11 +3,12 @@ package DocumentDAO
 import com.mongodb.casbah.Imports._ 
 
 import Document._
+import Account._
 
 case class DAOConfig (uri: String, 
 					db: String, 
 					coll: String, 
-					proj: Seq[(String, Int)] = Receipts.default_projection
+					proj: Seq[(String, Int)] = Receipt.default_projection
 					)
 
 class DocumentDAO(conf: DAOConfig) {
@@ -30,7 +31,7 @@ class DocumentDAO(conf: DAOConfig) {
 		val selection = Seq("account_id" -> id, 
 							"type" -> "receipt")
 		val receipts: Iterator[String] = find(selection)
-		Receipts.parseList(receipts)
+		Receipt.parseList(receipts)
 	}	
 
 	def count(selection: Seq[(String,Any)]): Int = {
@@ -43,6 +44,14 @@ class DocumentDAO(conf: DAOConfig) {
 			val num = count(selection)
 			(id, num)
 		}
+	}
+
+	def countByAccountId2(ids: Iterator[Int]): List[Account] = {
+		ids map {id =>
+			val selection = Seq("account_id" -> id)
+			new Account(id, count(selection))
+		} toList
+
 	}
 
 }
