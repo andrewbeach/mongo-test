@@ -6,7 +6,7 @@ import Data._
 import com.typesafe.config._
 import com.github.nscala_time.time.Imports._
 
-object Usage {
+object CalculateUsage extends App{
 	
 	def connect: DocumentDAO = {
 		val conf = ConfigFactory.load()
