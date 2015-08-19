@@ -2,11 +2,6 @@ package mongo.export
 
 import com.typesafe.config._
 
-import Document._
-import Account._
-import DocumentDAO._
-import Data._
-
 object Main extends App {
 
 	// Connect to documents collection in Shoeboxed MongoDB
@@ -14,9 +9,9 @@ object Main extends App {
 	val daoConfig = new DAOConfig(conf.getString("main.mongo.uri"),
 								"shoeboxed_documents",
 								"documents")
-	val documents = new DocumentDAO(daoConfig)
+	val documents = new ReceiptDAO(daoConfig)
 
-	val account_ids = Load.fromCSV("data/input.csv")
+	val ids: List[Int] = Load.fromCSV("data/input.csv").toList
 
 	// documents.countByAccountId(account_ids).foreach(println)
 
@@ -27,7 +22,7 @@ object Main extends App {
 	// 	Receipt.printList(lr)
 	// }
 
-	val count_list: List[Account] = documents.countByAccountId2(account_ids)
-	count_list.foreach(println)
+	val counts: List[Account] = documents.countByAccountId(ids)
+	counts.foreach(println)
 
 }

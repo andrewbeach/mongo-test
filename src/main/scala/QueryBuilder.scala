@@ -1,4 +1,4 @@
-package QueryBuilder
+package mongo.export
 
 import scala.collection.mutable.Builder
 
@@ -14,16 +14,14 @@ class QueryBuilder {
 
 	val builder = MongoDBObject.newBuilder
 
-	def addField(field: (String, Any)): this.type = {
+	def +(field: (String, Any)): this.type = {
 		builder += field
 		return this
 	}
 
-	def addDateRange(start: String, end: String): this.type = {
+	def +(start: DateTime, end: DateTime): this.type = {
 		RegisterJodaTimeConversionHelpers()
-		val start_date = DateTime.parse(start)
-		val end_date = DateTime.parse(end)
-		builder += "created" -> MongoDBObject("$gte" -> start_date, "$lt" -> end_date)
+		builder += ("created" -> MongoDBObject("$gte" -> start.toString, "$lt" -> end.toString))
 		return this
 	}
 

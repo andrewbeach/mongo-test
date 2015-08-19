@@ -1,4 +1,4 @@
-package Document
+package mongo.export
 
 import net.liftweb.json.{parse => parseJSON, _ => _} 
 
@@ -12,12 +12,12 @@ case class Receipt(account_id: Int,
 			source: Source) extends Document {
 
 	// Playing around with getter methods, practicing with options and defauls
-	def getSeller: String = fields.seller getOrElse "No vendor"
-	def getLast4: String = fields.payment_type.last4 getOrElse "No last 4"
-	def getCategories: List[String] = fields.categories getOrElse List()
-	def getCategoryString: String = (fields.categories getOrElse List()) mkString ", "
-	def getTotal: Int = fields.total.on_document getOrElse 0
-	def getSourceString: String = source.name match {
+	def seller: String = fields.seller getOrElse "No vendor"
+	def last4: String = fields.payment_type.last4 getOrElse "No last 4"
+	def categories: List[String] = fields.categories getOrElse List()
+	def categoryString: String = (fields.categories getOrElse List()) mkString ", "
+	def total: Double = fields.total.on_document getOrElse 0.0
+	def sourceString: String = source.name match {
 		case Some(s) if s == "mail in" => s + ": " + (this.source.envelope getOrElse "")
 		case Some(s) if s == "integration" => s + ": " + (this.source.api_app_name getOrElse "")
 		case Some(s) if s == "email" => s + ": " + (this.source.email_address getOrElse "")
@@ -45,18 +45,28 @@ case class PaymentType(`type`: Option[String],
 			last4: Option[String])
 
 // Receipt total fields
-case class Total(on_document: Option[Int], 
-			in_account_currency: Option[Int])
+case class Total(on_document: Option[Double], 
+			in_account_currency: Option[Double])
 
 /* RECEIPT COMPANION OBJECT */
 object Receipt {
 
-	def print(r: Receipt) = {
-		val print_string = r.getSeller + " for $" + r.getTotal + " | " + r.getCategoryString
+	val default_projection = Seq("account_id" -> 1, 
+							"source" -> 1, 
+							"fields.categories" -> 1, 
+							"fields.seller" -> 1, 
+							"fields.payment_type" -> 1, 
+							"fields.total" -> 1, 
+							"fields.note" -> 1, 
+							"fields.currency" -> 1, 
+							"_id" -> 0)
+
+	def print(r: Receipt): Unit = {
+		val print_string = r.seller + " for $" + r.total + " | " + r.categoryString
 		println(print_string)
 	}
 
-	def printList(ls: List[Receipt]) = {
+	def print(ls: List[Receipt]): Unit = {
 		ls.foreach(r => print(r))
 	}
 
@@ -65,23 +75,10 @@ object Receipt {
 		parseJSON(d).extract[Receipt]
 	}
 
-	def parseList[T <: Iterator[String]](ls: T): List[Receipt] = {
+	def parse(ls: List[String]): List[Receipt] = ls.map(li => parse(li))
 
-		ls.toList.map(li => parse(li))
-	}
-
-	val default_projection = Seq("account_id" -> 1, 
-								"source" -> 1, 
-								"fields.categories" -> 1, 
-								"fields.seller" -> 1, 
-								"fields.payment_type" -> 1, 
-								"fields.total" -> 1, 
-								"fields.note" -> 1, 
-								"fields.currency" -> 1, 
-								"_id" -> 0)
-
-	def total(ls: List[Receipt]): Int = {	
-		ls.foldLeft[Int](0)((acc, r) => acc + (r.fields.total.on_document getOrElse 0))
+	def total(ls: List[Receipt]): Double = {	
+		ls.foldLeft[Double](0.0)((acc, r) => acc + (r.fields.total.on_document getOrElse 0.0))
 	}
 
 	def groupByVendor(ls: List[Receipt]): Map[String, List[Receipt]] = {
