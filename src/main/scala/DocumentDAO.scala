@@ -24,6 +24,10 @@ abstract class DocumentDAO(conf: DAOConfig) {
 		coll.find(selection, projection).map(doc => doc.toString) toList
 	}
 
+	def count(selection: DBObject): Int = {
+		coll.count(selection)
+	}
+
 }
 
 class ReceiptDAO(conf: DAOConfig) extends DocumentDAO(conf) {
@@ -35,10 +39,6 @@ class ReceiptDAO(conf: DAOConfig) extends DocumentDAO(conf) {
 
 		Receipt.parse(results)
 	}	
-
-	def count(selection: DBObject): Int = {
-		coll.count(selection)
-	}
 
 	def countByAccountId(ids: List[Int]): List[Account] = {
 		ids map {id => 
