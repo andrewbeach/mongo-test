@@ -16,7 +16,7 @@ object Main extends App {
 								"documents")
 	val documents = new DocumentDAO(daoConfig)
 
-	val account_ids = Import.fromCSV("data/input.csv")
+	val account_ids = Load.fromCSV("data/input.csv")
 
 	// documents.countByAccountId(account_ids).foreach(println)
 

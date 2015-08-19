@@ -1,6 +1,6 @@
 package Data
 
-object Import {
+object Load {
 
 	def fromCSV(f: String): Iterator[Int] = {
 
@@ -11,6 +11,7 @@ object Import {
       	
 }
 
-// object Export {
+object Write {
 
-// }
+
+}

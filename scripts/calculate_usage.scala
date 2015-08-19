@@ -1,12 +1,10 @@
-import Account._
-import Document._
 import DocumentDAO._
-import Data._
+import QueryBuilder._ 
 
 import com.typesafe.config._
 import com.github.nscala_time.time.Imports._
 
-object CalculateUsage extends App{
+object Usage {
 	
 	def connect: DocumentDAO = {
 		val conf = ConfigFactory.load()
@@ -16,13 +14,31 @@ object CalculateUsage extends App{
 		new DocumentDAO(daoConfig)
 	}
 
-	def calculate(id: Int, start: String, end: String, documents: DocumentDAO): Int = {
-		val start_date = new DateTime(start)
-		val end_date = new DateTime(end)
-		val selection = Seq("account_id" -> id)
+	def calculate(id: Int, start: String, end: String): Int = {
+
+		val documents: DocumentDAO = connect
+		val query = new QueryBuilder
+		val selection = query.addField("account_id" -> id).addDateRange(start, end).result
+
 		documents.count(selection)
 	}
 
-	val account_ids = Import.fromCSV("data/input.csv")
+	def calculate(id: Int, start_date: String, months: Int): List[(String,Int)] = {
+
+		val documents: DocumentDAO = connect
+		val query = new QueryBuilder
+		(1 to months).toList.map(m => {
+			val start = DateTime.parse(start_date) + (m-1).months
+			val end = start + 1.months
+			val selection: DBObject = query.addField("account_id" -> id)
+								 .addDateRange(start.toString, end.toString)
+								 .result
+			val count = documents.count(selection)
+			(start.toString.slice(0,10) + " to " + end.toString.slice(0,10), count)
+		}) 
+		
+	}
+
+	// val account_ids = Load.fromCSV("data/input.csv")
 
 }
