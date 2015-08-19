@@ -8,8 +8,8 @@ abstract class Document {
 
 /* RECEIPT REPRESENTATION */
 case class Receipt(account_id: Int, 
-			fields: Fields, 
-			source: Source) extends Document {
+                       fields: Fields, 
+                       source: Source) extends Document {
 
 	// Playing around with getter methods, practicing with options and defauls
 	def seller: String = fields.seller getOrElse "No vendor"
@@ -28,38 +28,38 @@ case class Receipt(account_id: Int,
 
 // Receipt fields
 case class Fields(categories: Option[List[String]], 
-			payment_type: PaymentType, 
-			seller: Option[String], 
-			total: Total, 
-			note: Option[String], 
-			currency: Option[String])
+                payment_type: PaymentType, 
+                      seller: Option[String], 
+                       total: Total, 
+                        note: Option[String], 
+                    currency: Option[String])
 
 // Receipt source fields
 case class Source(name: Option[String],
-			envelope: Option[String],
-			api_app_name: Option[String],
-			email_address: Option[String])
+              envelope: Option[String],
+          api_app_name: Option[String],
+         email_address: Option[String])
 
 // Receipt payment type fields
 case class PaymentType(`type`: Option[String], 
-			last4: Option[String])
+                        last4: Option[String])
 
 // Receipt total fields
 case class Total(on_document: Option[Double], 
-			in_account_currency: Option[Double])
+         in_account_currency: Option[Double])
 
 /* RECEIPT COMPANION OBJECT */
 object Receipt {
 
 	val default_projection = Seq("account_id" -> 1, 
-							"source" -> 1, 
-							"fields.categories" -> 1, 
-							"fields.seller" -> 1, 
-							"fields.payment_type" -> 1, 
-							"fields.total" -> 1, 
-							"fields.note" -> 1, 
-							"fields.currency" -> 1, 
-							"_id" -> 0)
+                                 "source" -> 1, 
+                                 "fields.categories" -> 1, 
+                                 "fields.seller" -> 1, 
+                                 "fields.payment_type" -> 1, 
+                                 "fields.total" -> 1, 
+                                 "fields.note" -> 1, 
+                                 "fields.currency" -> 1, 
+                                 "_id" -> 0)
 
 	def print(r: Receipt): Unit = {
 		val print_string = r.seller + " for $" + r.total + " | " + r.categoryString

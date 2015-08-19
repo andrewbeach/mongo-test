@@ -4,15 +4,15 @@ import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.commons.conversions.scala._
 
 case class DAOConfig (uri: String, 
-					db: String, 
-					coll: String, 
-					proj: DBObject = {
-						val builder = new QueryBuilder
-						val projection = Receipt.default_projection.foreach(f =>
-							builder + f
-						)
-						builder.result
-					})
+                       db: String, 
+                     coll: String, 
+                     proj: DBObject = {
+                             val builder = new QueryBuilder
+                             val projection = Receipt.default_projection.foreach(f =>
+                                 builder + f
+                             )
+                             builder.result
+                         })
 
 abstract class DocumentDAO(conf: DAOConfig) {
 

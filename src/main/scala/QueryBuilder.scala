@@ -21,7 +21,8 @@ class QueryBuilder {
 
 	def +(start: DateTime, end: DateTime): this.type = {
 		RegisterJodaTimeConversionHelpers()
-		builder += ("created" -> MongoDBObject("$gte" -> start.toString, "$lt" -> end.toString))
+		builder += ("created" -> MongoDBObject("$gte" -> start.toString, 
+                                                "$lt" -> end.toString))
 		return this
 	}
 
